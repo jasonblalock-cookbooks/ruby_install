@@ -56,8 +56,7 @@ def install_ruby(options = {})
 
     action :nothing
   end.run_action(:run)
-
-  Chef::Log.debug("Lookup ruby version: #{lookup_ruby_version(*new_resource.ruby.split(' '))}")
+  Chef::Log.debug("Fully qualified ruby: #{fully_qualified_ruby(new_resource.ruby)}")
 
   # Install gems
 #  if new_resource.gems

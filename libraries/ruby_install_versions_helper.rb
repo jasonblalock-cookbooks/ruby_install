@@ -6,11 +6,25 @@ module RubyInstall
     end
 
     def ruby_versions_files
-      %w{version.txt stable.txt checksums.md5 checksums.sha1 checksums.sha256 checksums.sha512}
+      %w{versions.txt stable.txt}
     end
 
     def ruby_versions_url
-      'https://raw.githubusercontent.com/postmodern/ruby-versions/master'
+      'https://raw.githubusercontent.com/postmodern/ruby-versions/master/'
+    end
+
+    def parse_ruby(ruby_version)
+      if ruby_version.strip.include?(' ')
+        return ruby_version.split(' ', 2)
+      else
+        return ruby_version.split('-', 2)
+      end
+    end
+
+    def fully_qualified_ruby(ruby)
+      ruby_type, version = parse_ruby(ruby)
+      fq_version = lookup_ruby_version(ruby_type, version)
+      "#{ruby_type}-#{fq_version}"
     end
 
     def lookup_ruby_version(ruby, version, force_update = false)
@@ -24,7 +38,7 @@ module RubyInstall
     end
 
     def is_known_ruby_version(ruby, version)
-      is_known_version "#{ruby_install_cache_dir}/#{ruby}/versions.txt", version
+      is_known_version("#{ruby_install_versions_cache}/#{ruby}/versions.txt", version)
     end
     
     def is_known_version(file, version)
@@ -32,7 +46,7 @@ module RubyInstall
     end
     
     def latest_ruby_version(ruby, version)
-      latest_version "#{ruby_install_cache_dir}/#{ruby}"
+      latest_version("#{ruby_install_versions_cache}/#{ruby}/stable.txt", version)
     end
     
     def latest_version(file, key='')
@@ -61,9 +75,7 @@ module RubyInstall
 
     def download_ruby_versions_file(ruby, file)
       remote_file = Chef::Resource::RemoteFile.new(File.join(ruby_install_versions_cache, ruby, file), run_context)
-      Chef::Log.info(File.join(ruby_install_versions_cache, ruby, file))
-      Chef::Log.info(ruby)
-      remote_file.source(URI.join(ruby_versions_url, ruby, file).to_s)
+      remote_file.source(URI.join(ruby_versions_url, "#{ruby}/", file).to_s)
       remote_file.owner('root')
       remote_file.group('root')
       remote_file.mode('0755')
