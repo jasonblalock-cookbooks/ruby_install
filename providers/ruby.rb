@@ -1,5 +1,6 @@
 include RubyInstall::OptionsHelper
 include RubyInstall::UsersHelper
+include RubyInstall::VersionsHelper
 
 action :install do
   install_ruby "no-reinstall" => nil
@@ -55,6 +56,8 @@ def install_ruby(options = {})
 
     action :nothing
   end.run_action(:run)
+
+  Chef::Log.debug("Lookup ruby version: #{lookup_ruby_version(*new_resource.ruby.split(' '))}")
 
   # Install gems
 #  if new_resource.gems

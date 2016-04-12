@@ -1,0 +1,75 @@
+module RubyInstall
+  module VersionsHelper
+
+    def ruby_install_versions_cache
+      File.join(Chef::Config[:file_cache_path],'ruby_install', 'versions')
+    end
+
+    def ruby_versions_files
+      %w{version.txt stable.txt checksums.md5 checksums.sha1 checksums.sha256 checksums.sha512}
+    end
+
+    def ruby_versions_url
+      'https://raw.githubusercontent.com/postmodern/ruby-versions/master'
+    end
+
+    def lookup_ruby_version(ruby, version, force_update = false)
+      download_ruby_versions(ruby) if force_update || are_ruby_versions_missing?(ruby)
+      if is_known_ruby_version(ruby, version)
+        puts version
+        version
+      else
+        latest_ruby_version(ruby, version)
+      end
+    end
+
+    def is_known_ruby_version(ruby, version)
+      is_known_version "#{ruby_install_cache_dir}/#{ruby}/versions.txt", version
+    end
+    
+    def is_known_version(file, version)
+      File.readlines(file).grep(/^#{version}$/).any?
+    end
+    
+    def latest_ruby_version(ruby, version)
+      latest_version "#{ruby_install_cache_dir}/#{ruby}"
+    end
+    
+    def latest_version(file, key='')
+      lines = File.readlines(file)
+      return lines.last if (key.nil? || key.empty?)
+    
+      return lines.reverse_each.find { |i| i =~ /^(#{key})?(\..+|-.+)$/ }
+    end
+
+    def are_ruby_versions_missing?(ruby)
+      ruby_versions_files.each do |file|
+        return true unless File.exist?("#{ruby_install_versions_cache}/#{ruby}/#{file}")
+      end
+      false
+    end
+
+    def download_ruby_versions(ruby)
+      directory = Chef::Resource::Directory.new(File.join(ruby_install_versions_cache, ruby), run_context)
+      directory.recursive(true)
+      directory.owner('root')
+      directory.group('root')
+      directory.mode('0755')
+      directory.run_action(:create)
+      ruby_versions_files.each { |file| download_ruby_versions_file(ruby, file) }
+    end
+
+    def download_ruby_versions_file(ruby, file)
+      remote_file = Chef::Resource::RemoteFile.new(File.join(ruby_install_versions_cache, ruby, file), run_context)
+      Chef::Log.info(File.join(ruby_install_versions_cache, ruby, file))
+      Chef::Log.info(ruby)
+      remote_file.source(URI.join(ruby_versions_url, ruby, file).to_s)
+      remote_file.owner('root')
+      remote_file.group('root')
+      remote_file.mode('0755')
+      remote_file.use_last_modified(false)
+      remote_file.run_action(:create)
+      true
+    end
+  end
+end
