@@ -28,6 +28,8 @@ suites:
         rubies:
           - ruby: 'ruby 2.2.4'
             sha512: 'd27ca2f19c214ce87f906b57edd41f2f8af35b2871c191470facded9cfda15ba46e5c3bc7d5540225a38da6bd65050fcc8aaa4ffbadbb6bf7dc891c1821da0df'
+            gems:
+              - name: 'bundler'
 
           - ruby: 'ruby 2.3.0'
             sha256: 'ec7579eaba2e4c402a089dbc86c98e5f1f62507880fd800b9b34ca30166bfa5e'
@@ -36,3 +38,6 @@ suites:
             md5: '295b41f5dc332fbc0e0a639d784cc30f'
 
           - ruby: 'ruby 2.1'
+            gems:
+              - name: 'bundler'
+                version: '1.11.0'

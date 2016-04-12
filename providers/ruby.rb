@@ -59,15 +59,16 @@ def install_ruby(options = {})
   Chef::Log.debug("Fully qualified ruby: #{fully_qualified_ruby(new_resource.ruby)}")
 
   # Install gems
-#  if new_resource.gems
-#    new_resource.gems.each do |gem_config|
-#      gem_path = ::File.join(install_options["install-dir"], "bin/gem")
-#      gem_config = gem_config.dup # So we can delete entries from hash
-#
-#      gem_package gem_config.delete(:name) do
-#        gem_binary gem_path
-#        version gem_config.delete(:version)
-#      end
-#    end
-#  end
+  if new_resource.gems
+    new_resource.gems.each do |gem_config|
+      gem_path = ::File.join(install_options["rubies-dir"], fully_qualified_ruby(new_resource.ruby), "bin/gem")
+      Chef::Log.debug("Gem Path: #{gem_path}")
+      gem_config = gem_config.dup # So we can delete entries from hash
+
+      gem_package gem_config.delete(:name) do
+        gem_binary gem_path
+        version gem_config.delete(:version)
+      end
+    end
+  end
 end

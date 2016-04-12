@@ -26,4 +26,13 @@ describe 'ruby_install::install' do
       end
     end
   end
+
+  describe 'installs specified gems for each ruby' do
+    context 'full ruby version specified' do
+      describe command('/opt/rubies/ruby-2.2.4/bin/gem list bundler -i') do
+        its(:exit_status) { is_expected.to eq 0 }
+	its(:stdout) { is_expected.to match /true/ }
+      end
+    end
+  end
 end
