@@ -5,7 +5,6 @@ rubies = node['ruby_install']['rubies']
 rubies.each do |config|
   ruby_install_ruby config['ruby'] do
     ruby config['ruby']
-    install_dir config['install-dir']
     rubies_dir config['rubies-dir']
     user config['user']
     group config['group']
