@@ -24,7 +24,7 @@ module RubyInstall
     def fully_qualified_ruby(ruby)
       ruby_type, version = parse_ruby(ruby)
       fq_version = lookup_ruby_version(ruby_type, version)
-      "#{ruby_type}-#{fq_version}"
+      "#{ruby_type.to_s.strip}-#{fq_version.to_s.strip}"
     end
 
     def lookup_ruby_version(ruby, version, force_update = false)
