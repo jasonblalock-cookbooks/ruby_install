@@ -6,4 +6,6 @@ description 'Installs/Configures ruby_install'
 long_description 'Installs/Configures ruby_install'
 version '0.1.0'
 
+supports 'ubuntu', '>= 12.04'
+
 depends 'apt', '~> 3.0.0'

@@ -15,7 +15,7 @@ packages.each do |pkg|
 end
 
 file_name = "ruby-install-#{node['ruby_install']['checksum']}"
-dir_path = "#{Chef::Config['file_cache_path']}/ruby-install"
+dir_path = "#{Chef::Config['file_cache_path']}/ruby_install"
 file_path = "#{dir_path}/#{file_name}.tar.gz"
 
 directory "#{dir_path}/#{file_name}" do

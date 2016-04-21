@@ -1,7 +1,7 @@
 module RubyInstall
   module VersionsHelper
 
-    def ruby_install_versions_cache
+    def ruby_versions_cache
       File.join(Chef::Config[:file_cache_path],'ruby_install', 'versions')
     end
 
@@ -14,11 +14,8 @@ module RubyInstall
     end
 
     def parse_ruby(ruby_version)
-      if ruby_version.strip.include?(' ')
-        return ruby_version.split(' ', 2)
-      else
-        return ruby_version.split('-', 2)
-      end
+      return ruby_version.split(' ', 2) if ruby_version.strip.include?(' ')
+      ruby_version.split('-', 2)
     end
 
     def fully_qualified_ruby(ruby)
@@ -28,43 +25,33 @@ module RubyInstall
     end
 
     def lookup_ruby_version(ruby, version, force_update = false)
-      download_ruby_versions(ruby) if force_update || are_ruby_versions_missing?(ruby)
-      if is_known_ruby_version(ruby, version)
-        puts version
-        version
-      else
-        latest_ruby_version(ruby, version)
-      end
+      download_ruby_versions(ruby) if force_update || ruby_versions_missing?(ruby)
+
+      return version if known_ruby_version?(ruby, version)
+      latest_ruby_version(ruby, version)
     end
 
-    def is_known_ruby_version(ruby, version)
-      is_known_version("#{ruby_install_versions_cache}/#{ruby}/versions.txt", version)
-    end
-    
-    def is_known_version(file, version)
+    def known_ruby_version?(ruby, version)
+      file = File.join(ruby_versions_cache, ruby, 'versions.txt')
       File.readlines(file).grep(/^#{version}$/).any?
     end
     
     def latest_ruby_version(ruby, version)
-      latest_version("#{ruby_install_versions_cache}/#{ruby}/stable.txt", version)
-    end
-    
-    def latest_version(file, key='')
+      file = File.join(ruby_versions_cache, ruby, 'stable.txt')
       lines = File.readlines(file)
-      return lines.last if (key.nil? || key.empty?)
-    
-      return lines.reverse_each.find { |i| i =~ /^(#{key})?(\..+|-.+)$/ }
+      return lines.last if (version.nil? || version.empty?)
+      lines.reverse_each.find { |i| i =~ /^(#{version})?(\..+|-.+)$/ }
     end
-
-    def are_ruby_versions_missing?(ruby)
+    
+    def ruby_versions_missing?(ruby)
       ruby_versions_files.each do |file|
-        return true unless File.exist?("#{ruby_install_versions_cache}/#{ruby}/#{file}")
+        return true unless File.exist?("#{ruby_versions_cache}/#{ruby}/#{file}")
       end
       false
     end
 
     def download_ruby_versions(ruby)
-      directory = Chef::Resource::Directory.new(File.join(ruby_install_versions_cache, ruby), run_context)
+      directory = Chef::Resource::Directory.new(File.join(ruby_versions_cache, ruby), run_context)
       directory.recursive(true)
       directory.owner('root')
       directory.group('root')
@@ -74,7 +61,7 @@ module RubyInstall
     end
 
     def download_ruby_versions_file(ruby, file)
-      remote_file = Chef::Resource::RemoteFile.new(File.join(ruby_install_versions_cache, ruby, file), run_context)
+      remote_file = Chef::Resource::RemoteFile.new(File.join(ruby_versions_cache, ruby, file), run_context)
       remote_file.source(URI.join(ruby_versions_url, "#{ruby}/", file).to_s)
       remote_file.owner('root')
       remote_file.group('root')
